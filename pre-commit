@@ -1,0 +1,18 @@
+#!/usr/bin/php
+<?php
+$files = shell_exec('git diff-index --name-only --cached --diff-filter=ACMR HEAD | grep "\.php$"');
+$files = explode("\n", trim($files));
+$exitCode = 0;
+foreach ($files as $file) {
+    if (empty($file)) {
+        continue;
+    }
+    $lines = file($file);
+    foreach ($lines as $line => $content) {
+        if (preg_match('/\sdd\(/', $content)) {
+            printf("\033[0;31mdd() found on line %d in %s\033[0m\n", $line + 1, $file);
+            $exitCode = 1;
+        }
+    }
+}
+exit($exitCode);
